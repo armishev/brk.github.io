@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>TradingView Widget</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body, html {
       margin: 0;
@@ -11,23 +12,28 @@
       height: 100vh;
       display: flex;
       flex-direction: column;
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
     }
 
     #currency-select {
       width: 100%;
       height: 40px;
       font-size: 16px;
+      margin: 10px 0;
+      padding: 5px;
+      box-sizing: border-box;
     }
 
     #tradingview_chart {
       flex-grow: 1;
       width: 100%;
-      height: calc(100vh - 120px); /* Высота экрана минус высота нижней панели и селектора */
+      padding-bottom: 80px; /* Отступ для нижней панели */
     }
 
     .bottom-nav {
-      height: 80px;
-      background-color: #f1f1f1;
+      height: 60px;
+      background-color: #ffffff;
       display: flex;
       justify-content: space-around;
       align-items: center;
@@ -36,13 +42,30 @@
       left: 0;
       width: 100%;
       border-top: 1px solid #ccc;
+      box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
+      padding: 10px 0;
     }
 
     .bottom-nav button {
       background-color: transparent;
       border: none;
-      font-size: 16px;
+      font-size: 14px;
       cursor: pointer;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #333;
+    }
+
+    .bottom-nav button span {
+      font-size: 12px;
+      margin-top: 5px;
+    }
+
+    .bottom-nav button img {
+      width: 24px;
+      height: 24px;
     }
   </style>
 </head>
@@ -56,11 +79,26 @@
 <div id="tradingview_chart"></div>
 
 <div class="bottom-nav">
-  <button>Задания</button>
-  <button>Фортуна</button>
-  <button>Биржа</button>
-  <button>Друзья</button>
-  <button>Аккаунт</button>
+  <button>
+    <img src="https://via.placeholder.com/24" alt="Задания">
+    <span>Задания</span>
+  </button>
+  <button>
+    <img src="https://via.placeholder.com/24" alt="Фортуна">
+    <span>Фортуна</span>
+  </button>
+  <button>
+    <img src="https://via.placeholder.com/24" alt="Биржа">
+    <span>Биржа</span>
+  </button>
+  <button>
+    <img src="https://via.placeholder.com/24" alt="Друзья">
+    <span>Друзья</span>
+  </button>
+  <button>
+    <img src="https://via.placeholder.com/24" alt="Аккаунт">
+    <span>Аккаунт</span>
+  </button>
 </div>
 
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
