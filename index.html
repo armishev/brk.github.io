@@ -1,186 +1,329 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>TradingView Widget</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      font-family: Arial, sans-serif;
-      background-color: #1c1c1e;
-      color: #ffffff;
-    }
-
-    #currency-select {
-      width: 100%;
-      height: 40px;
-      font-size: 16px;
-      margin: 10px 0;
-      padding: 5px;
-      background-color: #2c2c2e;
-      color: #ffffff;
-      border: none;
-      border-radius: 5px;
-      box-sizing: border-box;
-    }
-
-    #tradingview_chart {
-      flex-grow: 1;
-      width: 100%;
-      padding-bottom: 80px; /* Отступ для нижней панели */
-      background-color: #2c2c2e;
-    }
-
-    .bottom-nav {
-      height: 60px;
-      background-color: #2c2c2e;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      border-top: 1px solid #444;
-      box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
-      padding: 10px 0;
-    }
-
-    .bottom-nav button {
-      background-color: transparent;
-      border: none;
-      font-size: 14px;
-      cursor: pointer;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      color: #ffffff;
-    }
-
-    .bottom-nav button span {
-      font-size: 12px;
-      margin-top: 5px;
-    }
-
-    .bottom-nav button img {
-      width: 24px;
-      height: 24px;
-    }
-
-    .buy-button {
-      background-color: #ff007a;
-      color: #ffffff;
-      border: none;
-      padding: 15px;
-      border-radius: 5px;
-      text-align: center;
-      margin-top: 10px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    .history-item {
-      background-color: #333;
-      padding: 10px;
-      margin: 5px 0;
-      border-radius: 5px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: #ffffff;
-    }
-
-    .history-item span {
-      color: #ff007a;
-    }
-
-  </style>
+    <meta charset="UTF-8">
+    <title>Крипто График</title>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: #d1d4dc;
+            font-family: Arial, sans-serif;
+        }
+        #container {
+            position: relative;
+            width: 800px;
+            height: 500px;
+            margin: 0 auto;
+        }
+        #container > div {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .toolbar {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .toolbar button {
+            background-color: #2e2e2e;
+            color: #d1d4dc;
+            border: 1px solid #3e3e3e;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+        .toolbar button.active {
+            background-color: #4e4e4e;
+        }
+        h2 {
+            text-align: center;
+            color: #d1d4dc;
+        }
+        .chart-type-buttons, .symbol-buttons {
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-<select id="currency-select">
-  <option value="BINANCE:BTCUSDT">BTC</option>
-  <option value="BINANCE:TONUSDT">TON</option>
-  <option value="BINANCE:ETHUSDT">ETH</option>
-</select>
-
-<div id="tradingview_chart"></div>
-
-<div class="bottom-nav">
-  <button>
-    <img src="https://via.placeholder.com/24" alt="Задания">
-    <span>Задания</span>
-  </button>
-  <button>
-    <img src="https://via.placeholder.com/24" alt="Фортуна">
-    <span>Фортуна</span>
-  </button>
-  <button>
-    <img src="https://via.placeholder.com/24" alt="Биржа">
-    <span>Биржа</span>
-  </button>
-  <button>
-    <img src="https://via.placeholder.com/24" alt="Друзья">
-    <span>Друзья</span>
-  </button>
-  <button>
-    <img src="https://via.placeholder.com/24" alt="Аккаунт">
-    <span>Аккаунт</span>
-  </button>
+<h2 id="chart-title">BTC/BRK График</h2>
+<!-- Добавляем кнопки выбора валюты -->
+<div class="toolbar symbol-buttons">
+    <button data-symbol="BTCUSDT">BTC</button>
+    <button data-symbol="TONUSDT">TON</button>
+    <button data-symbol="ETHUSDT">ETH</button>
 </div>
-
-<button class="buy-button">Купить BTC</button>
-
-<div class="history-item">
-  <span>BTC/BRK</span>
-  <span>4432.4 Покупка</span>
+<div class="toolbar">
+    <button data-interval="1d">День</button>
+    <button data-interval="1w">Неделя</button>
+    <button data-interval="1M">Месяц</button>
+    <button data-interval="1y">Год</button>
 </div>
-
-<div class="history-item">
-  <span>BTC/BRK</span>
-  <span>4432.4 Покупка</span>
+<!-- Кнопки для выбора типа графика -->
+<div class="toolbar chart-type-buttons">
+    <button data-chart-type="Candlestick">Свечной</button>
+    <button data-chart-type="Line">Линейный</button>
+    <button data-chart-type="Area">Областной</button>
+    <button data-chart-type="Bar">Барный</button>
 </div>
+<div id="container"></div>
+<script>
+    // Опции для темного дизайна
+    const chartOptions = {
+        layout: {
+            background: { type: 'solid', color: '#1e1e1e' },
+            textColor: '#d1d4dc'
+        },
+        grid: {
+            vertLines: { color: '#2e2e2e' },
+            horzLines: { color: '#2e2e2e' },
+        },
+        timeScale: {
+            borderColor: '#2e2e2e',
+        },
+        rightPriceScale: {
+            borderColor: '#2e2e2e',
+        },
+    };
 
-<div class="history-item">
-  <span>BTC/BRK</span>
-  <span>4432.4 Покупка</span>
-</div>
+    const chartContainer = document.getElementById('container');
+    const chart = LightweightCharts.createChart(chartContainer, chartOptions);
 
-<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-<script type="text/javascript">
-  function createWidget(symbol) {
-    new TradingView.widget({
-      "autosize": true,
-      "symbol": symbol,
-      "interval": "D",
-      "timezone": "Europe/Moscow",
-      "theme": "dark",
-      "style": "1",
-      "locale": "en",
-      "hide_legend": true,
-      "container_id": "tradingview_chart",
-      "allow_symbol_change": false,
-      "save_image": false,
-      "calendar": false,
-      "hide_volume": true
+    let series; // Переменная для хранения текущей серии графика
+
+    // Функция для создания серии в зависимости от типа графика
+    function createSeries(type) {
+        // Удаляем предыдущую серию, если она существует
+        if (series) {
+            chart.removeSeries(series);
+        }
+
+        switch(type) {
+            case 'Candlestick':
+                series = chart.addCandlestickSeries({
+                    upColor: '#26a69a',
+                    downColor: '#ef5350',
+                    borderVisible: false,
+                    wickUpColor: '#26a69a',
+                    wickDownColor: '#ef5350'
+                });
+                break;
+            case 'Line':
+                series = chart.addLineSeries({
+                    color: '#2196F3',
+                    lineWidth: 2
+                });
+                break;
+            case 'Area':
+                series = chart.addAreaSeries({
+                    topColor: 'rgba(33, 150, 243, 0.56)',
+                    bottomColor: 'rgba(33, 150, 243, 0.04)',
+                    lineColor: 'rgba(33, 150, 243, 1)',
+                    lineWidth: 2
+                });
+                break;
+            case 'Bar':
+                series = chart.addBarSeries({
+                    upColor: '#26a69a',
+                    downColor: '#ef5350',
+                    thinBars: false
+                });
+                break;
+            default:
+                series = chart.addCandlestickSeries({
+                    upColor: '#26a69a',
+                    downColor: '#ef5350',
+                    borderVisible: false,
+                    wickUpColor: '#26a69a',
+                    wickDownColor: '#ef5350'
+                });
+        }
+    }
+
+    // Добавление легенды (заменяем наименование USDT на BRK)
+    const legend = document.createElement('div');
+    legend.style.padding = '4px';
+    legend.style.zIndex = 1;
+    legend.style.color = '#d1d4dc';
+    chartContainer.appendChild(legend);
+
+    // Функция для обновления легенды и заголовка
+    function updateLegendAndTitle() {
+        const symbolName = currentSymbol.replace('USDT', 'BRK');
+        legend.innerHTML = `${symbolName}`;
+        document.getElementById('chart-title').innerText = `${symbolName} График`;
+    }
+
+    // Функция для получения данных
+    function fetchData(interval) {
+        let limit;
+        let binanceInterval;
+
+        switch(interval) {
+            case '1d':
+                limit = 24;
+                binanceInterval = '1h';
+                break;
+            case '1w':
+                limit = 168; // 24h * 7d
+                binanceInterval = '1h';
+                break;
+            case '1M':
+                limit = 720; // 24h * 30d
+                binanceInterval = '1h';
+                break;
+            case '1y':
+                limit = 365;
+                binanceInterval = '1d';
+                break;
+            default:
+                limit = 100;
+                binanceInterval = '1h';
+        }
+
+        fetch(`https://api.binance.com/api/v3/klines?symbol=${currentSymbol}&interval=${binanceInterval}&limit=${limit}`)
+            .then(response => response.json())
+            .then(data => {
+                const formattedData = data.map(item => {
+                    const time = item[0] / 1000;
+                    const value = parseFloat(item[4]);
+
+                    if (chartType === 'Candlestick' || chartType === 'Bar') {
+                        return {
+                            time: time,
+                            open: parseFloat(item[1]),
+                            high: parseFloat(item[2]),
+                            low: parseFloat(item[3]),
+                            close: parseFloat(item[4])
+                        };
+                    } else {
+                        return {
+                            time: time,
+                            value: value
+                        };
+                    }
+                });
+
+                series.setData(formattedData);
+                chart.timeScale().fitContent();
+            })
+            .catch(error => console.error('Ошибка при получении данных:', error));
+    }
+
+    // Обновление данных в реальном времени
+    let binanceSocket;
+    function startWebSocket(interval) {
+        if (binanceSocket) {
+            binanceSocket.close();
+        }
+
+        let binanceInterval;
+
+        switch(interval) {
+            case '1d':
+            case '1w':
+            case '1M':
+                binanceInterval = '1h';
+                break;
+            case '1y':
+                binanceInterval = '1d';
+                break;
+            default:
+                binanceInterval = '1h';
+        }
+
+        const streamSymbol = currentSymbol.toLowerCase();
+
+        binanceSocket = new WebSocket(`wss://stream.binance.com:9443/ws/${streamSymbol}@kline_${binanceInterval}`);
+
+        binanceSocket.onmessage = function (event) {
+            const message = JSON.parse(event.data);
+            const candlestick = message.k;
+
+            const time = candlestick.t / 1000;
+            const value = parseFloat(candlestick.c);
+
+            let newData;
+
+            if (chartType === 'Candlestick' || chartType === 'Bar') {
+                newData = {
+                    time: time,
+                    open: parseFloat(candlestick.o),
+                    high: parseFloat(candlestick.h),
+                    low: parseFloat(candlestick.l),
+                    close: parseFloat(candlestick.c)
+                };
+            } else {
+                newData = {
+                    time: time,
+                    value: value
+                };
+            }
+
+            series.update(newData);
+        };
+    }
+
+    // Переменные для хранения текущих значений
+    let currentInterval = '1d';
+    let chartType = 'Candlestick';
+    let currentSymbol = 'BTCUSDT';
+
+    // Функция для обновления графика при изменении настроек
+    function updateChart() {
+        createSeries(chartType);
+        fetchData(currentInterval);
+        startWebSocket(currentInterval);
+        updateLegendAndTitle();
+    }
+
+    // Установка обработчиков событий для кнопок интервалов
+    const intervalButtons = document.querySelectorAll('.toolbar button[data-interval]');
+    intervalButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Удаление класса active со всех кнопок интервалов
+            intervalButtons.forEach(btn => btn.classList.remove('active'));
+            // Добавление класса active на нажатую кнопку
+            this.classList.add('active');
+
+            currentInterval = this.getAttribute('data-interval');
+            updateChart();
+        });
     });
-  }
 
-  document.addEventListener("DOMContentLoaded", function() {
-    var select = document.getElementById('currency-select');
-    createWidget(select.value);
+    // Установка обработчиков событий для кнопок типа графика
+    const chartTypeButtons = document.querySelectorAll('.chart-type-buttons button');
+    chartTypeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Удаление класса active со всех кнопок типа графика
+            chartTypeButtons.forEach(btn => btn.classList.remove('active'));
+            // Добавление класса active на нажатую кнопку
+            this.classList.add('active');
 
-    select.addEventListener('change', function() {
-      document.getElementById('tradingview_chart').innerHTML = "";
-      createWidget(this.value);
+            chartType = this.getAttribute('data-chart-type');
+            updateChart();
+        });
     });
-  });
+
+    // Установка обработчиков событий для кнопок выбора валюты
+    const symbolButtons = document.querySelectorAll('.symbol-buttons button');
+    symbolButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Удаление класса active со всех кнопок символов
+            symbolButtons.forEach(btn => btn.classList.remove('active'));
+            // Добавление класса active на нажатую кнопку
+            this.classList.add('active');
+
+            currentSymbol = this.getAttribute('data-symbol');
+            updateChart();
+        });
+    });
+
+    // Инициализация с настройками по умолчанию
+    document.querySelector('.symbol-buttons button[data-symbol="BTCUSDT"]').classList.add('active');
+    document.querySelector('.toolbar button[data-interval="1d"]').classList.add('active');
+    document.querySelector('.chart-type-buttons button[data-chart-type="Candlestick"]').classList.add('active');
+    updateChart();
 </script>
 </body>
 </html>
